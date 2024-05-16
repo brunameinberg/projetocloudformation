@@ -1,0 +1,204 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Projeto Computação em nuvem - Cloudformation
+
+Parameters: #Parametros que podem ser passados para o template
+  KeyName:
+    Type: String
+    Description: mykey
+
+Resources:
+  MyVPC: #Cria uma VPC
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: "10.0.0.0/16"
+
+  MyInternetGateway: #Cria um gateway de internet para comunicar a VPC com a internet
+    Type: AWS::EC2::InternetGateway
+
+  AttachGateway: #Anexa o gateway de internet à VPC
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref MyVPC
+      InternetGatewayId: !Ref MyInternetGateway
+
+  MinhaSubrede1: #Cria uma subrede
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MyVPC
+      AvailabilityZone: us-east-2a
+      CidrBlock: "10.0.0.0/24"
+  
+  MinhaSubrede2: #Cria outra subrede
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MyVPC
+      AvailabilityZone: us-east-2b
+      CidrBlock: "10.0.2.0/24"
+
+  MyAutoScalingGroup: #Cria um grupo de auto sclaing para gerenciar as instâncias EC2
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AvailabilityZones: [us-east-2a, us-east-2b]  # Especificando as zonas de disponibilidade onde as instâncias serão lançadas
+      LaunchConfigurationName: !Ref MyLaunchConfig
+      MinSize: 2  # Número mínimo de instâncias
+      MaxSize: 7  # Número máximo de instâncias
+      DesiredCapacity: 3  # Capacidade desejada inicialmente
+      VPCZoneIdentifier: #Onde as instâncias serão lançadas
+        - !Ref MinhaSubrede1
+        - !Ref MinhaSubrede2
+      TargetGroupARNs:
+        - !Ref MyTargetGroup  
+      HealthCheckType: ELB  #É utilizado o ELB para distribuir automaticamente o tráfego entre as instâncias
+      HealthCheckGracePeriod: 300  # 300 segundos (5 minutos) de período de carência
+  
+  MyScalingPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref MyAutoScalingGroup
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        TargetValue: 70.0  
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+  
+  MyCPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: "Alarme de utilização da CPU excedendo 70%"
+      Namespace: AWS/EC2
+      MetricName: CPUUtilization
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref MyAutoScalingGroup
+      Statistic: Average
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 70
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions:
+        - !Ref MyScalingPolicy
+
+  MyALB: #Loadbalancer para distribuir o tráfego entre as instâncias
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: MyALB
+      Subnets: 
+        - !Ref MinhaSubrede1
+        - !Ref MinhaSubrede2
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      Scheme: internet-facing
+      Tags:
+        - Key: Name
+          Value: MyALB
+  
+  ALBListener: #Listener para o ALB para redirecionar o tráfego recebido na porta 80 para as subredes especificadas
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref MyTargetGroup
+      LoadBalancerArn: !Ref MyALB
+      Port: 80
+      Protocol: HTTP
+
+  MyTargetGroup: #Define o grupo de destino para o ALB
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties: #Configurações de health check e relação com a comunicação com as instâncias
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 2
+      Name: MyTargetGroup
+      Port: 80
+      Protocol: HTTP
+      TargetType: instance
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref MyVPC
+  
+  ALBSecurityGroup: #Cria um grupo de segurança para o ALB
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for ALB
+      VpcId: !Ref MyVPC
+      SecurityGroupIngress: #Permite o tráfego na porta 80 de qualquer IP.
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  
+  MyLaunchConfig: #Configuração de lançamento do autoscaling 
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: ami-09b90e09742640522
+      InstanceType: t2.micro
+      KeyName: !Ref KeyName
+      SecurityGroups: #Grupos de segurança
+        - !Ref InstanceSecurityGroup
+        - !Ref ALBSecurityGroup
+      UserData:                      # Script de inicialização para configurar a instância
+        Fn::Base64: |
+          #!/bin/bash
+          apt-get update -y
+          apt-get install -y python3-pip
+          pip3 install Flask
+          mkdir /opt/minha_aplicacao
+          cd /opt/minha_aplicacao
+          wget -O app.py https://example.com/app.py
+          wget -O formulario.html https://example.com/formulario.html
+          nohup python3 app.py &
+
+  InstanceSecurityGroup: #Grupo de segurança para as instâncias
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: launch-wizard
+      GroupDescription: launch-wizard created
+      VpcId: !Ref MyVPC
+      SecurityGroupIngress: #Portas permitidas
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 186.232.61.4/32
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+
+  MyDynamoDBTable: #Cria uma tabela DynamoDB
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: MyDynamoDBTable
+      AttributeDefinitions:
+        - AttributeName: MyPartitionKey
+          AttributeType: S
+      KeySchema:
+        - AttributeName: MyPartitionKey
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  DynamoDBSecurityGroup: #Grupo de segurança para a tabela DynamoDB
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for DynamoDB
+      VpcId: !Ref MyVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          SourceSecurityGroupId: !Ref InstanceSecurityGroup
+      
+Outputs:
+  AutoScalingGroup:
+    Description: "ID do Grupo de Auto Scaling"
+    Value: !Ref MyAutoScalingGroup
+  DynamoDBTable:
+    Description: "ID da tabela DynamoDB"
+    Value: !Ref MyDynamoDBTable
