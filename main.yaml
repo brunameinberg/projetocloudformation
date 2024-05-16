@@ -27,6 +27,7 @@ Resources:
       VpcId: !Ref MyVPC
       AvailabilityZone: us-east-2a
       CidrBlock: "10.0.0.0/24"
+      MapPublicIpOnLaunch: true
   
   MinhaSubrede2: #Cria outra subrede
     Type: AWS::EC2::Subnet
@@ -50,7 +51,11 @@ Resources:
         - !Ref MyTargetGroup  
       HealthCheckType: ELB  #É utilizado o ELB para distribuir automaticamente o tráfego entre as instâncias
       HealthCheckGracePeriod: 300  # 300 segundos (5 minutos) de período de carência
-  
+      Tags:
+        - Key: Name
+          Value: MyAutoScalingGroup
+          PropagateAtLaunch: true
+ 
   MyScalingPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:
@@ -146,8 +151,8 @@ Resources:
           pip3 install Flask
           mkdir /opt/minha_aplicacao
           cd /opt/minha_aplicacao
-          wget -O app.py https://example.com/app.py
-          wget -O formulario.html https://example.com/formulario.html
+          wget -O app.py https://raw.githubusercontent.com/brunameinberg/projetocloudformation/main/app.py
+          wget -O formulario.html https://raw.githubusercontent.com/brunameinberg/projetocloudformation/main/formulario.html
           nohup python3 app.py &
 
   InstanceSecurityGroup: #Grupo de segurança para as instâncias
@@ -199,6 +204,3 @@ Outputs:
   AutoScalingGroup:
     Description: "ID do Grupo de Auto Scaling"
     Value: !Ref MyAutoScalingGroup
-  DynamoDBTable:
-    Description: "ID da tabela DynamoDB"
-    Value: !Ref MyDynamoDBTable
