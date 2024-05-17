@@ -158,6 +158,10 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 5000
+          ToPort: 5000
+          CidrIp: 0.0.0.0/0
 
   MyLaunchConfig: #Configuração de lançamento do autoscaling 
     Type: AWS::AutoScaling::LaunchConfiguration
@@ -176,11 +180,13 @@ Resources:
           pip3 install flask
           mkdir /opt/minha_aplicacao
           mkdir /opt/minha_aplicacao/templates
+          mkdir /opt/minha_aplicacao/static
           wget -O /opt/minha_aplicacao/app.py https://raw.githubusercontent.com/brunameinberg/projetocloudformation/main/app.py
-          wget -O /opt/minha_aplicacao/templates/formulario.html https://raw.githubusercontent.com/brunameinberg/projetocloudformation/main/formulario.html
+          wget -O /opt/minha_aplicacao/templates/formulario.html https://raw.githubusercontent.com/brunameinberg/projetocloudformation/main/templates/formulario.html
+          wget -O /opt/minha_aplicacao/static/formulario.css https://raw.githubusercontent.com/brunameinberg/projetocloudformation/main/static/formulario.css
+          wget -O /opt/minha_aplicacao/static/formulario.js https://raw.githubusercontent.com/brunameinberg/projetocloudformation/main/static/formulario.js
           nohup python3 /opt/minha_aplicacao/app.py > /var/log/app.log 2>&1 &
-
-
+      
 
   InstanceSecurityGroup: #Grupo de segurança para as instâncias
     Type: AWS::EC2::SecurityGroup
