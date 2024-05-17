@@ -130,7 +130,7 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref MyTargetGroup
       LoadBalancerArn: !Ref MyALB
-      Port: 5000
+      Port: 80
       Protocol: HTTP
 
   MyTargetGroup: #Define o grupo de destino para o ALB
@@ -142,7 +142,7 @@ Resources:
       HealthCheckTimeoutSeconds: 10
       HealthyThresholdCount: 2
       Name: MyTargetGroup
-      Port: 5000
+      Port: 80
       Protocol: HTTP
       TargetType: instance
       UnhealthyThresholdCount: 2
@@ -155,8 +155,8 @@ Resources:
       VpcId: !Ref MyVPC
       SecurityGroupIngress: #Permite o tráfego na porta 80 de qualquer IP.
         - IpProtocol: tcp
-          FromPort: 5000
-          ToPort: 5000
+          FromPort: 80
+          ToPort: 80
           CidrIp: 0.0.0.0/0
 
   MyLaunchConfig: #Configuração de lançamento do autoscaling 
