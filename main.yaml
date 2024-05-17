@@ -35,6 +35,32 @@ Resources:
       VpcId: !Ref MyVPC
       AvailabilityZone: us-east-2b
       CidrBlock: "10.0.2.0/24"
+      MapPublicIpOnLaunch: true
+  
+  MyPublicRouteTable: # Cria uma tabela de rota pública
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MyVPC
+
+  MyPublicRoute: # Adiciona uma rota para a internet na tabela de rota pública
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway # Garante que o gateway de internet esteja anexado antes de criar a rota
+    Properties:
+      RouteTableId: !Ref MyPublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref MyInternetGateway
+
+  Subnet1RouteTableAssociation: # Associa a sub-rede 1 à tabela de rota pública
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MinhaSubrede1
+      RouteTableId: !Ref MyPublicRouteTable
+
+  Subnet2RouteTableAssociation: # Associa a sub-rede 2 à tabela de rota pública
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MinhaSubrede2
+      RouteTableId: !Ref MyPublicRouteTable
 
   MyAutoScalingGroup: #Cria um grupo de auto sclaing para gerenciar as instâncias EC2
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -133,27 +159,28 @@ Resources:
           ToPort: 80
           CidrIp: 0.0.0.0/0
 
-  
   MyLaunchConfig: #Configuração de lançamento do autoscaling 
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
-      ImageId: ami-09b90e09742640522
+      ImageId: ami-0f30a9c3a48f3fa79
       InstanceType: t2.micro
       KeyName: !Ref KeyName
       SecurityGroups: #Grupos de segurança
         - !Ref InstanceSecurityGroup
         - !Ref ALBSecurityGroup
-      UserData:                      # Script de inicialização para configurar a instância
+      UserData:
         Fn::Base64: |
           #!/bin/bash
           apt-get update -y
           apt-get install -y python3-pip
-          pip3 install Flask
+          pip3 install flask
           mkdir /opt/minha_aplicacao
-          cd /opt/minha_aplicacao
-          wget -O app.py https://raw.githubusercontent.com/brunameinberg/projetocloudformation/main/app.py
-          wget -O formulario.html https://raw.githubusercontent.com/brunameinberg/projetocloudformation/main/formulario.html
-          nohup python3 app.py &
+          mkdir /opt/minha_aplicacao/templates
+          wget -O /opt/minha_aplicacao/app.py https://raw.githubusercontent.com/brunameinberg/projetocloudformation/main/app.py
+          wget -O /opt/minha_aplicacao/templates/formulario.html https://raw.githubusercontent.com/brunameinberg/projetocloudformation/main/formulario.html
+          nohup python3 /opt/minha_aplicacao/app.py > /var/log/app.log 2>&1 &
+
+
 
   InstanceSecurityGroup: #Grupo de segurança para as instâncias
     Type: AWS::EC2::SecurityGroup
@@ -165,7 +192,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CidrIp: 186.232.61.4/32
+          CidrIp: 10.0.0.0/0
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
@@ -173,6 +200,10 @@ Resources:
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 5000
+          ToPort: 5000
           CidrIp: 0.0.0.0/0
 
   MyDynamoDBTable: #Cria uma tabela DynamoDB
@@ -204,3 +235,6 @@ Outputs:
   AutoScalingGroup:
     Description: "ID do Grupo de Auto Scaling"
     Value: !Ref MyAutoScalingGroup
+  ALBDNSName:
+    Description: "DNS Name of the ALB"
+    Value: !GetAtt MyALB.DNSName
