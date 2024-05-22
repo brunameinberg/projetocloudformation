@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 import boto3
-
+import uuid
 
 app = Flask(__name__, template_folder='templates')
 dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
@@ -21,15 +21,18 @@ def teste():
 @app.route('/salvar_dados', methods=['POST'])
 def salvar_dados():
     if request.method == 'POST':
-        # Extrai a mensagem do formulário
-        mensagem = request.form['mensagem']
+        mensagem = request.form['mensagem']  # Extrai a mensagem do formulário
+        unique_id = str(uuid.uuid4())  # Gera um UUID único
 
-        # Insere a mensagem na tabela DynamoDB
-        table.put_item(Item={'mensagem': mensagem})
+        # Insere a mensagem na tabela DynamoDB com o UUID como chave de partição
+        table.put_item(Item={
+            'MyPartitionKey': unique_id,  # Use o UUID como a chave de partição
+            'mensagem': mensagem
+        })
 
         # Redireciona para a página de teste para exibir as mensagens
         return teste()
-
+    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
 
