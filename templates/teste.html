@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário e Mensagens</title>
+</head>
+<body>
+    <h1>Formulário</h1>
+    <form action="/salvar_dados" method="POST">
+        <label for="mensagem">Digite sua mensagem:</label><br>
+        <input type="text" id="mensagem" name="mensagem" required><br><br>
+        <input type="submit" value="Enviar">
+    </form>
+
+    <h1>Mensagens Salvas</h1>
+    <ul id="mensagens">
+        <!-- Aqui as mensagens serão inseridas dinamicamente pelo JavaScript -->
+    </ul>
+    <script src="static/teste.js"></script>
+</body>
+</html>
