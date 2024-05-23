@@ -28,11 +28,13 @@ def teste():
 @app.route('/salvar_dados', methods=['POST'])
 def salvar_dados():
     if request.method == 'POST':
-        mensagem = request.form['mensagem']  # Extrai a mensagem do formulário
-        unique_id = request.form['id']  # Gera um UUID único
+        mensagem = request.form['mensagem']
+        unique_id = str(uuid.uuid4())  # Gera um UUID único
+
+        logging.info(f'Mensagem recebida: {mensagem}')
+        logging.info(f'UUID gerado: {unique_id}')
 
         try:
-            # Insere a mensagem na tabela DynamoDB com o UUID como chave de partição
             table.put_item(Item={
                 'id': unique_id,  # Use o UUID como a chave de partição
                 'mensagem': mensagem
@@ -42,9 +44,7 @@ def salvar_dados():
         except Exception as e:
             logging.error(f'Erro ao inserir dados no DynamoDB: {e}')
 
-        # Redireciona para a página de teste para exibir as mensagens
-        return teste()
-    
+        return '', 204  # Retorna um status de sucesso sem conteúdo
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
-
