@@ -15,7 +15,9 @@
 
     <h1>Mensagens Salvas</h1>
     <ul id="mensagens">
-        <!-- Aqui as mensagens serão inseridas dinamicamente pelo JavaScript -->
+        {% for mensagem in mensagens %}
+            <li>{{ mensagem }}</li>
+        {% endfor %}
     </ul>
     <script src="{{ url_for('static', filename='teste.js') }}" type="text/javascript" defer=""></script> 
 
