@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Formulário</h1>
-    <form action="/salvar_dados" method="POST">
+    <form id="formMensagem" action="/salvar_dados" method="POST">
         <label for="mensagem">Digite sua mensagem:</label><br>
         <input type="text" id="mensagem" name="mensagem" required><br><br>
         <input type="submit" value="Enviar">
@@ -17,6 +17,7 @@
     <ul id="mensagens">
         <!-- Aqui as mensagens serão inseridas dinamicamente pelo JavaScript -->
     </ul>
-    <script src="static/teste.js"></script>
+    <script src="{{ url_for('static', filename='teste.js') }}" type="text/javascript" defer=""></script> 
+
 </body>
 </html>

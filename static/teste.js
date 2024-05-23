@@ -1,6 +1,6 @@
 // Função para carregar as mensagens do servidor e exibi-las na página
 function carregarMensagens() {
-    fetch('/mensagens')
+    fetch('/teste')  // Alterado para a rota correta (/teste) para carregar as mensagens
     .then(response => response.json())
     .then(data => {
         const ul = document.getElementById('mensagens');
@@ -14,11 +14,20 @@ function carregarMensagens() {
 }
 
 // Chama a função para carregar as mensagens ao carregar a página
-window.onload = carregarMensagens;
+window.onload = function() {
+    carregarMensagens();
 
-// Adiciona um evento para recarregar as mensagens quando um novo envio for feito
-document.getElementById('formMensagem').addEventListener('submit', function(event) {
-    event.preventDefault(); // Impede o envio padrão do formulário
-    carregarMensagens(); // Recarrega as mensagens
-    this.reset(); // Limpa o formulário
-});
+    // Adiciona um event listener ao formulário
+    const formMensagem = document.getElementById('formMensagem');
+    if (formMensagem) {
+        formMensagem.addEventListener('submit', function(event) {
+            event.preventDefault(); // Impede o envio padrão do formulário
+
+            // Recarrega as mensagens
+            carregarMensagens();
+
+            // Limpa o formulário
+            formMensagem.reset();
+        });
+    }
+};
