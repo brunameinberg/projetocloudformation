@@ -29,12 +29,12 @@ def teste():
 def salvar_dados():
     if request.method == 'POST':
         mensagem = request.form['mensagem']  # Extrai a mensagem do formulário
-        unique_id = str(uuid.uuid4())  # Gera um UUID único
+        unique_id = request.form['id']  # Gera um UUID único
 
         try:
             # Insere a mensagem na tabela DynamoDB com o UUID como chave de partição
             table.put_item(Item={
-                'MyPartitionKey': unique_id,  # Use o UUID como a chave de partição
+                'id': unique_id,  # Use o UUID como a chave de partição
                 'mensagem': mensagem
             })
 
