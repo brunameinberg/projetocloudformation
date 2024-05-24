@@ -34,6 +34,9 @@ A região escolhida para a implantação foi `us-east-2` (Ohio), devido aos cust
 - **Provisionamento:** Provisionada uma instância DynamoDb.
 - **Segurança:** Configurados Security Groups para garantir que apenas as instâncias EC2 possam se conectar ao banco de dados.
 
+## A estrutura completa construída
+![alt text](img/arquitetura.png)
+
 ## Análise de Custo com a Calculadora AWS
 
 Foi utilizada a Calculadora de Custo da AWS para estimar os custos mensais da arquitetura proposta, considerando os custos de todos os recursos utilizados (EC2, ALB, DynamoDB, etc.).
@@ -54,5 +57,6 @@ https://www.treinaweb.com.br/blog/como-instalar-e-configurar-o-aws-cli)
 
 1. Executar o Script CloudFormation para criar a pilha:
 ``` cmd
-aws cloudformation create-stack --stack-name my-stack --template-body file://caminho/para/seu/template.yaml --parameters ParameterKey=KeyName,ParameterValue=mykey
+aws cloudformation create-stack --stack-name stackbruna --template-body file://main.yaml --parameters ParameterKey=KeyName,ParameterValue=mykey --capabilities CAPABILITY_IAM
+
 
