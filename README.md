@@ -47,16 +47,16 @@ O Load Balancer deste projeto é *físico*, isto é, ele é um hardware presente
 
 ## A estrutura completa construída
 Aqui é possível visualizar todos os recursos criados e suas conexões.
-![alt text](img/arquitetura.png)
+![alt text](https://github.com/brunameinberg/projetocloudformation/blob/main/img/arquitetura.png)
 
 ## Análise de Custo com a Calculadora AWS
 
 Foi utilizada a Calculadora de Custo da AWS para estimar os custos mensais da arquitetura proposta, considerando os custos de todos os recursos utilizados (EC2, ALB, DynamoDB, etc.).
 Nessa imagem, podemos visualizar o custo mensal dividido pelos recursos utilizados. Aqui contém tanto o meu quanto da minha colega, por isso, dividindo por 2, temos que meu custo mensal previsto é de, aproximadamente 73 dólares. Nesse caso, fiz questão de abrir algumas vezes o link do meu load balancer pra garantir que eu estivesse "exigindo da minha aplicação"
-![Visualização de custo](img/custo.png)
+![Visualização de custo](https://github.com/brunameinberg/projetocloudformation/blob/main/img/custo.png)
 
 Nessa imagem temos a "divisão" de gastos por dia, incluindo abril e maio.
-![Visualização de custo 2](img/custo2.png)
+![Visualização de custo 2](https://github.com/brunameinberg/projetocloudformation/blob/main/img/custo2.png)
 
 
 # Guia de utilização
@@ -92,19 +92,19 @@ aws cloudformation create-stack --stack-name stackbruna --template-body file://m
 
 4. Acessando a aplicação
 Após rodar os comandos, acessando o dashboard de CloudFormation no AWS Console, você irá se deparar com a seguinte imagem:
-![alt text](img/pilhas.png)
+![alt text](https://github.com/brunameinberg/projetocloudformation/blob/main/img/pilhas.png)
 
 Clicando na pilha e acessando a aba recursos, encontre o recurso chamado MyALB (Load Balancer)
-![alt text](img/recursos.png)
+![alt text](https://github.com/brunameinberg/projetocloudformation/blob/main/img/recursos.png)
 
 Clique no link e voce irá acessar a parte de EC2 onde contém os Load Balancers. Copie o link do DNS e cole no seu browser.
-![alt text](img/MyALB.png)
+![alt text](https://github.com/brunameinberg/projetocloudformation/blob/main/img/MyALB.png)
 
 Assim, voce terá acesso a aplicação!
-![alt text](img/aplicação.png)
+![alt text](https://github.com/brunameinberg/projetocloudformation/blob/main/img/aplicação.png)
 
 No botão ali embaixo você terá acesso a um formulário só para mostrar a integração das intâncias com o banco de dados.
-![alt text](img/formulario.png)
+![alt text](https://github.com/brunameinberg/projetocloudformation/blob/main/img/formulario.png)
 
 Fim :)
 
