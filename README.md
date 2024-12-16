@@ -106,5 +106,9 @@ Assim, voce terá acesso a aplicação!
 No botão ali embaixo você terá acesso a um formulário só para mostrar a integração das intâncias com o banco de dados.
 ![alt text](https://github.com/brunameinberg/projetocloudformation/blob/main/img/formulario.png)
 
+
+5. Créditos
+O código do "botão fujão" foi retirado do seguinte repositório:
+https://github.com/felipetaua/DiaDosNamorados/
 Fim :)
 
